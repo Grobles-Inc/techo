@@ -1,8 +1,16 @@
 ---
 import Page from "../layouts/Page.astro";
+import PropertyForm from "../components/PropertyForm.astro";
 ---
 
 <Page title="Propiedades" description="Propiedades">
   <h1>Propiedades</h1>
+  <button
+    class="btn btn-neutral"
+    onclick="document.getElementById('property_modal').showModal()"
+  >
+    Agregar Propiedad
+  </button>
+  <PropertyForm />
   <p>Explora nuestras propiedades disponibles. Próximamente más detalles.</p>
 </Page>

@@ -1,0 +1,18 @@
+# Project Tech Stack and Setup
+
+This project uses:
+- **Astro**: For building fast, content-focused websites.
+- **TailwindCSS**: For utility-first CSS styling.
+- **DaisyUI**: A TailwindCSS component library.
+- **MDX**: For writing JSX in Markdown documents.
+- **Lucide**: For open-source icons.
+
+Key scripts defined in `package.json`:
+- `dev`: Starts the Astro development server.
+- `build`: Builds the project for production.
+- `preview`: Previews the production build locally.
+- `astro`: Runs Astro CLI commands.
+description:
+globs:
+alwaysApply: false
+---
