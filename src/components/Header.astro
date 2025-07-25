@@ -1,29 +1,218 @@
 ---
-import { SITE_TITLE } from "../consts";
 import HeaderLink from "./HeaderLink.astro";
-import { HomeIcon } from "@lucide/astro";
-import { Users } from "@lucide/astro";
-import { MailIcon } from "@lucide/astro";
+import { HomeIcon, Users, LayoutPanelTop, MoveUpRight } from "@lucide/astro";
+import logoPrincipal from "../assets/logoPrincipal.jpg";
 ---
 
-<header>
-	<nav class="flex justify-between items-center">
-		<h2><a href="/">{SITE_TITLE}</a></h2>
-		<div class="internal-links">
-			<HeaderLink href="/">
-				<HomeIcon />
-				Inicio</HeaderLink
-			>
-			<HeaderLink href="/nosotros">
-				<Users />
-				Nosotros</HeaderLink
-			>
-			<HeaderLink href="/propiedades">Propiedades</HeaderLink>
-			<HeaderLink href="/contacto">
-				<MailIcon />
-				Contacto</HeaderLink
-			>
+<header
+	id="main-header"
+	class="fixed w-full py-6 backdrop-blur-sm bg-white px-6 top-0 left-0 right-0 z-50 pointer-events-auto transition-all duration-300"
+>
+	<div class="container max-w-7xl mx-auto flex items-center justify-between">
+		<div class="flex items-center">
+			<a href="/">
+				<img src={logoPrincipal.src} alt="Logo" class="h-10" />
+			</a>
 		</div>
-		<div></div>
+
+		<!-- Navegación de escritorio -->
+		<nav class="hidden md:block">
+			<ul class="flex space-x-8 font-semibold">
+				<li>
+					<HeaderLink
+						href="/"
+						class="flex items-center gap-2 text-[#383838] hover:text-primary transition-all duration-300 hover:opacity-80"
+					>
+						<HomeIcon class="w-5 h-5" />
+						<span>Inicio</span>
+					</HeaderLink>
+				</li>
+				<li>
+					<HeaderLink
+						href="/nosotros"
+						class="flex items-center gap-2 text-[#383838] hover:text-primary transition-all duration-300 hover:opacity-80"
+					>
+						<Users class="w-5 h-5" />
+						Nosotros
+					</HeaderLink>
+				</li>
+				<li>
+					<HeaderLink
+						href="/propiedades"
+						class="flex items-center gap-2 text-[#383838] hover:text-primary transition-all duration-300 hover:opacity-80"
+					>
+						<LayoutPanelTop class="w-5 h-5" />
+						Propiedades
+					</HeaderLink>
+				</li>
+			</ul>
+		</nav>
+
+		<div class="flex items-center">
+			<button
+				id="mobile-menu-button"
+				class="md:hidden flex items-center justify-center w-8 h-8 relative"
+			>
+				<img
+					id="menu-icon"
+					src="https://img.icons8.com/?size=100&id=8113&format=png"
+					alt="menu"
+					class="w-6 h-6 transition-opacity duration-300"
+				/>
+
+				<img
+					id="close-icon"
+					src="https://img.icons8.com/?size=160&id=XBRxNqBV78jJ&format=png"
+					alt="closemenu"
+					class="w-6 h-6 absolute opacity-0 transition-opacity duration-300"
+				/>
+			</button>
+			<a
+				href="/contacto"
+				class="btn btn-lg hidden md:flex text-[#383838] hover:text-primary bg-white border border-gray-300 transition-all duration-300 hover:scale-110 items-center gap-2 group"
+			>
+				Contáctanos
+				<MoveUpRight class="w-5 h-5 transition-transform duration-500 group-hover:rotate-[360deg]" />
+			</a>
+		</div>
+	</div>
+
+	<!-- Navegación móvil -->
+	<nav
+		id="mobile-menu"
+		class="md:hidden fixed top-0 right-0 w-full max-h-0 opacity-0 bg-white overflow-hidden transition-all duration-300 ease-in-out shadow-lg"
+	>
+		<div class="flex items-center justify-between p-6">
+			<img src={logoPrincipal.src} alt="Logo" class="h-10" />
+			<button
+				id="mobile-menu-close"
+				class="text-gray-800 flex items-center justify-center w-8 h-8"
+			>
+				<img
+					src="https://img.icons8.com/?size=160&id=XBRxNqBV78jJ&format=png"
+					alt="closemenu"
+					class="w-6 h-6"
+				/>
+			</button>
+		</div>
+		<ul class="flex flex-col space-y-6 p-6 font-semibold">
+			<li>
+				<HeaderLink
+					href="/"
+					class="flex items-center gap-3 text-primary transition-all duration-300 py-2 text-xl"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+					</svg>
+					Inicio
+				</HeaderLink>
+			</li>
+			<li>
+				<HeaderLink
+					href="/nosotros"
+					class="flex items-center gap-3 text-primary transition-all duration-300 py-2 text-xl"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+					</svg>
+					Nosotros
+				</HeaderLink>
+			</li>
+			<li>
+				<HeaderLink
+					href="/propiedades"
+					class="flex items-center gap-3 text-primary transition-all duration-300 py-2 text-xl"
+				>
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+					</svg>
+					Propiedades
+				</HeaderLink>
+			</li>
+			<li class="pt-4">
+				<a
+					href="/contacto"
+					class="btn btn-lg bg-white text-primary border border-gray-300 transition-all duration-300"
+					>Contáctanos
+				</a>
+			</li>
+		</ul>
 	</nav>
 </header>
+
+<script is:inline>
+	let lastScrollY = window.scrollY;
+
+	window.addEventListener("load", () => {
+		const header = document.getElementById("main-header");
+		const mobileMenuButton = document.getElementById("mobile-menu-button");
+		const mobileMenuClose = document.getElementById("mobile-menu-close");
+		const mobileMenu = document.getElementById("mobile-menu");
+		const menuIcon = document.getElementById("menu-icon");
+		const closeIcon = document.getElementById("close-icon");
+
+		if (
+			!header ||
+			!mobileMenuButton ||
+			!mobileMenu ||
+			!menuIcon ||
+			!closeIcon ||
+			!mobileMenuClose
+		)
+			return;
+
+		let isMenuOpen = false;
+
+		const toggleMenu = (open) => {
+			isMenuOpen = open;
+			if (open) {
+				mobileMenu.style.maxHeight = "100vh";
+				mobileMenu.style.opacity = "1";
+				menuIcon.style.opacity = "0";
+				closeIcon.style.opacity = "1";
+				document.body.style.overflow = "hidden";
+			} else {
+				mobileMenu.style.maxHeight = "0";
+				mobileMenu.style.opacity = "0";
+				menuIcon.style.opacity = "1";
+				closeIcon.style.opacity = "0";
+				document.body.style.overflow = "";
+			}
+		};
+
+		mobileMenuButton.addEventListener("click", () => toggleMenu(!isMenuOpen));
+		mobileMenuClose.addEventListener("click", () => toggleMenu(false));
+
+		const mobileLinks = mobileMenu.getElementsByTagName("a");
+		Array.from(mobileLinks).forEach((link) => {
+			link.addEventListener("click", () => toggleMenu(false));
+		});
+
+		window.addEventListener("scroll", () => {
+			const currentScrollY = window.scrollY;
+
+			if (currentScrollY > lastScrollY && currentScrollY > 100) {
+				header.classList.add("-translate-y-full");
+				if (isMenuOpen) {
+					toggleMenu(false);
+				}
+			} else {
+				header.classList.remove("-translate-y-full");
+			}
+
+			lastScrollY = currentScrollY;
+		});
+	});
+</script>
+
+<style>
+	#mobile-menu {
+		transition: max-height 0.3s ease, opacity 0.3s ease;
+		max-height: 0;
+		opacity: 0;
+	}
+	#mobile-menu[style*="max-height: 100vh"] {
+		max-height: 100vh;
+		opacity: 1;
+	}
+</style>
