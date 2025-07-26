@@ -34,6 +34,7 @@ if (Astro.request.method === "POST") {
     }
 
     const newProperty = {
+      id: 0, // Will be set below
       titulo,
       ubicacion,
       coordenadas: formData.get("coordenadas")?.toString() || "",
