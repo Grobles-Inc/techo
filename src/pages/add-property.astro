@@ -1,11 +1,10 @@
 ---
-import fs from "node:fs/promises";
-import path from "node:path";
 import Page from "../layouts/Page.astro";
 
 export const prerender = false;
 
 let errorMessage: string | null = null;
+let successMessage: string | null = null;
 
 if (Astro.request.method === "POST") {
   try {
@@ -14,79 +13,105 @@ if (Astro.request.method === "POST") {
     const titulo = formData.get("titulo")?.toString().trim();
     const ubicacion = formData.get("ubicacion")?.toString().trim();
     const tipoOperacion = formData.get("tipoOperacion")?.toString().trim();
+    const descripcion = formData.get("descripcion")?.toString().trim();
 
     // Server-side validation
-    if (!titulo || !ubicacion || !tipoOperacion) {
+    if (!titulo || !ubicacion || !tipoOperacion || !descripcion) {
       throw new Error(
-        "Los campos Título, Ubicación y Tipo de Operación son obligatorios.",
+        "Los campos Título, Ubicación, Tipo de Operación y Descripción son obligatorios.",
       );
     }
 
     let imagenes = [];
     const imagenesStr = formData.get("imagenes");
-
     if (imagenesStr && typeof imagenesStr === "string" && imagenesStr.trim()) {
       try {
         imagenes = JSON.parse(imagenesStr);
       } catch (e) {
         console.error("Error parsing imagenes JSON:", e);
-        // Reset to empty array on parse error
         imagenes = [];
       }
     }
 
-    const propertiesFilePath = path.resolve(
-      process.cwd(),
-      "src/data/properties.json",
-    );
-    let currentProperties = [];
-    try {
-      const fileContent = await fs.readFile(propertiesFilePath, "utf-8");
-      if (fileContent && fileContent.trim()) {
-        currentProperties = JSON.parse(fileContent);
-      }
-    } catch (readError) {
-      if (
-        readError instanceof Error &&
-        "code" in readError &&
-        readError.code !== "ENOENT"
-      ) {
-        throw readError;
-      }
-    }
-
-    const maxId = currentProperties.reduce(
-      (max: number, p: any) => (p.id > max ? p.id : max),
-      0,
-    );
-
     const newProperty = {
-      id: maxId + 1,
-      titulo: titulo || "",
-      ubicacion: ubicacion || "",
+      titulo,
+      ubicacion,
       coordenadas: formData.get("coordenadas")?.toString() || "",
-      tipoOperacion: tipoOperacion || "",
+      tipoOperacion,
       areaTerreno: parseFloat(formData.get("areaTerreno")?.toString() || "0"),
       tipoVivienda: formData.get("tipoVivienda")?.toString() || "",
       precio: parseFloat(formData.get("precio")?.toString() || "0"),
-      descripcion: formData.get("descripcion")?.toString() || "",
+      descripcion,
       caracteristicas: formData.get("caracteristicas")?.toString() || "",
-      imagenes: imagenes,
+      imagenes,
     };
 
-    currentProperties.push(newProperty);
-    await fs.writeFile(
-      propertiesFilePath,
-      JSON.stringify(currentProperties, null, 2),
-      "utf-8",
+    // Get environment variables
+    const JSONBIN_MASTER_KEY =
+      "$2a$10$nobY12xjte.MZ8ULE6NMTuH2yyjO.r.8veMsJchqYuoKIjgx0jBcm";
+    const JSONBIN_BIN_ID = import.meta.env.JSONBIN_BIN_ID;
+
+    if (!JSONBIN_MASTER_KEY || !JSONBIN_BIN_ID) {
+      throw new Error(
+        "Error de configuración del servidor. Contacte al administrador.",
+      );
+    }
+
+    // Get existing properties from JSONBin
+    const getResponse = await fetch(
+      `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+      {
+        headers: {
+          "X-Master-Key": JSONBIN_MASTER_KEY,
+          "X-Bin-Meta": "false",
+        },
+      },
     );
 
-    return Astro.redirect("/propiedades");
+    let existingProperties = [];
+    if (getResponse.ok) {
+      const data = await getResponse.json();
+      // Handle both array format and object format
+      existingProperties = Array.isArray(data) ? data : data.properties || [];
+    }
+
+    // Generate new ID
+    const maxId = existingProperties.reduce(
+      (max: number, p: any) => (p.id && p.id > max ? p.id : max),
+      0,
+    );
+    newProperty.id = maxId + 1;
+
+    // Add new property to array
+    const updatedProperties = [...existingProperties, newProperty];
+
+    // Save back to JSONBin (always use array format for consistency)
+    const updateResponse = await fetch(
+      `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": JSONBIN_MASTER_KEY,
+        },
+        body: JSON.stringify(updatedProperties),
+      },
+    );
+
+    if (!updateResponse.ok) {
+      const errorText = await updateResponse.text();
+      console.error("JSONBin update failed:", updateResponse.status, errorText);
+      throw new Error(`Error al guardar: ${updateResponse.status}`);
+    }
+
+    // Success - redirect to properties page
+    return Astro.redirect("/propiedades?success=true");
   } catch (error) {
     console.error("Failed to add property:", error);
-    errorMessage = "No se pudo agregar la propiedad. Inténtelo de nuevo.";
     if (error instanceof Error) {
       errorMessage = error.message;
+    } else {
+      errorMessage = "Error inesperado. Inténtelo de nuevo.";
     }
   }
 }

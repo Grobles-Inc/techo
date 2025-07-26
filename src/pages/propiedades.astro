@@ -1,33 +1,80 @@
 ---
 import Page from "../layouts/Page.astro";
 
-import properties from "../data/properties.json";
+const JSONBIN_MASTER_KEY = import.meta.env.JSONBIN_MASTER_KEY;
+const JSONBIN_BIN_ID = import.meta.env.JSONBIN_BIN_ID;
+
+// Check for success message
+const url = new URL(Astro.request.url);
+const showSuccess = url.searchParams.get("success") === "true";
+
+let properties = [];
+try {
+  const response = await fetch(
+    `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+    {
+      headers: {
+        "X-Master-Key": JSONBIN_MASTER_KEY,
+        "X-Bin-Meta": "false",
+      },
+    },
+  );
+  if (response.ok) {
+    const data = await response.json();
+    // Handle both array format and object format
+    properties = Array.isArray(data) ? data : data.properties || [];
+  }
+} catch (error) {
+  console.error("Error fetching properties:", error);
+}
 ---
 
 <Page title="Propiedades" description="Propiedades">
-  <h1>Propiedades</h1>
-
-  <a href="/add-property" class="btn btn-neutral">Agregar Propiedad</a>
-  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+  <div class="w-11/12 lg:max-w-5xl mx-auto py-8">
     {
-      properties.map((property: any) => (
-        <div class="card bg-base-100 shadow-xl">
-          <figure>
-            <img
-              src={property.imagenes?.[0] || "/placeholder.jpg"}
-              alt={property.titulo}
-              class="h-48 w-full object-cover"
+      showSuccess && (
+        <div role="alert" class="alert alert-success mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
             />
-          </figure>
-          <div class="card-body">
-            <h2 class="card-title">{property.titulo}</h2>
-            <p>{property.descripcion}</p>
-            <div class="card-actions justify-end">
-              <button class="btn btn-primary">Ver Detalles</button>
+          </svg>
+          <span>¡Propiedad agregada exitosamente!</span>
+        </div>
+      )
+    }
+    <h1>Propiedades</h1>
+
+    <a href="/add-property" class="btn btn-neutral">Agregar Propiedad</a>
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+      {
+        properties.map((property: any) => (
+          <div class="card bg-base-100 shadow-xl">
+            <figure>
+              <img
+                src={property.imagenes?.[0] || "/placeholder.jpg"}
+                alt={property.titulo}
+                class="h-48 w-full object-cover"
+              />
+            </figure>
+            <div class="card-body">
+              <h2 class="card-title">{property.titulo}</h2>
+              <p>{property.descripcion}</p>
+              <div class="card-actions justify-end">
+                <button class="btn btn-primary">Ver Detalles</button>
+              </div>
             </div>
           </div>
-        </div>
-      ))
-    }
-  </section>
+        ))
+      }
+    </section>
+  </div>
 </Page>
