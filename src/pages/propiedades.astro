@@ -1,16 +1,33 @@
 ---
 import Page from "../layouts/Page.astro";
-import PropertyForm from "../components/PropertyForm.astro";
+
+import properties from "../data/properties.json";
 ---
 
 <Page title="Propiedades" description="Propiedades">
   <h1>Propiedades</h1>
-  <button
-    class="btn btn-neutral"
-    onclick="document.getElementById('property_modal').showModal()"
-  >
-    Agregar Propiedad
-  </button>
-  <PropertyForm />
-  <p>Explora nuestras propiedades disponibles. Próximamente más detalles.</p>
+
+  <a href="/add-property" class="btn btn-neutral">Agregar Propiedad</a>
+  <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+    {
+      properties.map((property: any) => (
+        <div class="card bg-base-100 shadow-xl">
+          <figure>
+            <img
+              src={property.imagenes?.[0] || "/placeholder.jpg"}
+              alt={property.titulo}
+              class="h-48 w-full object-cover"
+            />
+          </figure>
+          <div class="card-body">
+            <h2 class="card-title">{property.titulo}</h2>
+            <p>{property.descripcion}</p>
+            <div class="card-actions justify-end">
+              <button class="btn btn-primary">Ver Detalles</button>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </section>
 </Page>

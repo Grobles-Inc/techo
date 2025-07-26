@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "titulo": "Casa en el centro de la ciudad",
+    "ubicacion": "Calle 123, Ciudad",
+    "coordenadas": "19.432833, -99.133209",
+    "tipoOperacion": "Venta",
+    "areaTerreno": 100,
+    "tipoVivienda": "Casa",
+    "descripcion": "Casa en el centro de la ciudad con 3 habitaciones y 2 baños",
+    "caracteristicas": "Cocina equipada, sala de estar, 2 baños, terraza, garaje",
+    "precio": 1000000,
+    "imagenes": [
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753540250/techo/properties/GsKZ4prW4AAgyzn_sf1aq4.jpg",
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753540250/techo/properties/GsKZ4prW4AAgyzn_sf1aq4.jpg",
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753540250/techo/properties/GsKZ4prW4AAgyzn_sf1aq4.jpg"
+    ]
+  },
+  {
+    "id": 1753539286334,
+    "titulo": "Culpa architecto qu",
+    "ubicacion": "Elit ducimus eaque",
+    "coordenadas": "Nam cupidatat nisi n",
+    "tipoOperacion": "Venta",
+    "areaTerreno": 8,
+    "tipoVivienda": "Terreno",
+    "precio": 16,
+    "descripcion": "Et non sunt eos dolo",
+    "caracteristicas": "Architecto sunt veli",
+    "imagenes": [
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753541475/techo/properties/GsiY1ctXcAAjLyb_bfdbdy.jpg",
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753541476/techo/properties/GsKZ4prW4AAgyzn_dlur9b.jpg",
+      "https://res.cloudinary.com/diqe1byxy/image/upload/v1753541477/techo/properties/GspahtfW0AALAgm_xdcnix.jpg"
+    ]
+  }
+]

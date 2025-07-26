@@ -1,0 +1,336 @@
+---
+import fs from "node:fs/promises";
+import path from "node:path";
+import Page from "../layouts/Page.astro";
+
+export const prerender = false;
+
+let errorMessage: string | null = null;
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+
+    const titulo = formData.get("titulo")?.toString().trim();
+    const ubicacion = formData.get("ubicacion")?.toString().trim();
+    const tipoOperacion = formData.get("tipoOperacion")?.toString().trim();
+
+    // Server-side validation
+    if (!titulo || !ubicacion || !tipoOperacion) {
+      throw new Error(
+        "Los campos Título, Ubicación y Tipo de Operación son obligatorios.",
+      );
+    }
+
+    let imagenes = [];
+    const imagenesStr = formData.get("imagenes");
+
+    if (imagenesStr && typeof imagenesStr === "string" && imagenesStr.trim()) {
+      try {
+        imagenes = JSON.parse(imagenesStr);
+      } catch (e) {
+        console.error("Error parsing imagenes JSON:", e);
+        // Reset to empty array on parse error
+        imagenes = [];
+      }
+    }
+
+    const propertiesFilePath = path.resolve(
+      process.cwd(),
+      "src/data/properties.json",
+    );
+    let currentProperties = [];
+    try {
+      const fileContent = await fs.readFile(propertiesFilePath, "utf-8");
+      if (fileContent && fileContent.trim()) {
+        currentProperties = JSON.parse(fileContent);
+      }
+    } catch (readError) {
+      if (
+        readError instanceof Error &&
+        "code" in readError &&
+        readError.code !== "ENOENT"
+      ) {
+        throw readError;
+      }
+    }
+
+    const maxId = currentProperties.reduce(
+      (max: number, p: any) => (p.id > max ? p.id : max),
+      0,
+    );
+
+    const newProperty = {
+      id: maxId + 1,
+      titulo: titulo || "",
+      ubicacion: ubicacion || "",
+      coordenadas: formData.get("coordenadas")?.toString() || "",
+      tipoOperacion: tipoOperacion || "",
+      areaTerreno: parseFloat(formData.get("areaTerreno")?.toString() || "0"),
+      tipoVivienda: formData.get("tipoVivienda")?.toString() || "",
+      precio: parseFloat(formData.get("precio")?.toString() || "0"),
+      descripcion: formData.get("descripcion")?.toString() || "",
+      caracteristicas: formData.get("caracteristicas")?.toString() || "",
+      imagenes: imagenes,
+    };
+
+    currentProperties.push(newProperty);
+    await fs.writeFile(
+      propertiesFilePath,
+      JSON.stringify(currentProperties, null, 2),
+      "utf-8",
+    );
+
+    return Astro.redirect("/propiedades");
+  } catch (error) {
+    console.error("Failed to add property:", error);
+    errorMessage = "No se pudo agregar la propiedad. Inténtelo de nuevo.";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+  }
+}
+---
+
+<Page title="Agregar Propiedad" description="Agregar Propiedad">
+  <div class="w-11/12 lg:max-w-5xl mx-auto py-8">
+    <h3 class="font-bold text-lg mb-4">Agregar Propiedad</h3>
+    {
+      errorMessage && (
+        <div role="alert" class="alert alert-error mb-4">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="stroke-current shrink-0 h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{errorMessage}</span>
+        </div>
+      )
+    }
+    <form method="POST" class="flex flex-col gap-4 lg:grid lg:grid-cols-2">
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Título</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Título de la propiedad"
+          class="input input-bordered w-full block"
+          name="titulo"
+          required
+        />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Ubicación</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Ubicación de la propiedad"
+          class="input input-bordered w-full block"
+          name="ubicacion"
+          required
+        />
+      </div>
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Coordenadas</span>
+        </label>
+        <input
+          type="text"
+          placeholder="Coordenadas de la propiedad"
+          class="input input-bordered w-full block"
+          name="coordenadas"
+        />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Tipo de Operación</span>
+        </label>
+        <select
+          class="select select-bordered w-full block"
+          name="tipoOperacion"
+          required
+        >
+          <option value="" disabled selected>Selecciona una opción</option>
+          <option>Venta</option>
+          <option>Alquiler</option>
+        </select>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Área de Terreno (m²)</span>
+        </label>
+        <input
+          type="number"
+          placeholder="Área del terreno en m²"
+          class="input input-bordered w-full block"
+          name="areaTerreno"
+        />
+      </div>
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Precio (USD)</span>
+        </label>
+        <input
+          type="number"
+          placeholder="Precio de la propiedad"
+          class="input input-bordered w-full block"
+          name="precio"
+        />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Tipo de Vivienda</span>
+        </label>
+        <select
+          class="select select-bordered w-full block"
+          name="tipoVivienda"
+          required
+        >
+          <option value="" disabled selected>Selecciona una opción</option>
+          <option>Casa</option>
+          <option>Apartamento</option>
+          <option>Terreno</option>
+        </select>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Descripción</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered h-24 w-full block"
+          placeholder="Descripción detallada de la propiedad"
+          name="descripcion"
+          required></textarea>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Características Adicionales</span>
+        </label>
+        <textarea
+          class="textarea textarea-bordered h-24 w-full block"
+          placeholder="Características adicionales (ej. número de habitaciones, baños, etc.)"
+          name="caracteristicas"></textarea>
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label block">
+          <span class="label-text">Imágenes</span>
+        </label>
+        <input
+          type="file"
+          multiple
+          class="file-input file-input-bordered w-full block"
+          id="image-upload-input"
+          accept="image/*"
+        />
+        <div
+          id="loading-spinner"
+          class="hidden loading loading-spinner loading-md"
+        >
+        </div>
+        <div id="image-preview" class="mt-2"></div>
+        <input type="hidden" name="imagenes" id="image-urls-input" />
+      </div>
+      <div class="modal-action mt-4 col-span-2 flex items-center gap-4">
+        <button type="submit" class="btn btn-primary" id="submit-button"
+          >Guardar Propiedad</button
+        >
+        <a href="/propiedades" class="btn btn-outline">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</Page>
+
+<script is:inline>
+  const imageUploadInput = document.getElementById("image-upload-input");
+  const loadingSpinner = document.getElementById("loading-spinner");
+  const imagePreview = document.getElementById("image-preview");
+  const imageUrlsInput = document.getElementById("image-urls-input");
+  const submitButton = document.getElementById("submit-button");
+  const form = document.querySelector("form");
+
+  let uploadedImageUrls = [];
+
+  if (imageUploadInput) {
+    imageUploadInput.addEventListener("change", async (e) => {
+      const target = e.target;
+      if (target.files && target.files.length > 0) {
+        loadingSpinner.classList.remove("hidden");
+        submitButton.disabled = true;
+
+        const files = Array.from(target.files);
+        const newUploadedUrls = [];
+
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append("file", file);
+          formData.append("upload_preset", "ml_default"); // Replace with your actual upload preset
+          formData.append("folder", "techo/properties"); // Custom folder
+
+          try {
+            const response = await fetch(
+              "https://api.cloudinary.com/v1_1/diqe1byxy/image/upload", // Replace with your Cloudinary cloud name
+              {
+                method: "POST",
+                body: formData,
+              },
+            );
+            const data = await response.json();
+            if (data.secure_url) {
+              newUploadedUrls.push(data.secure_url);
+
+              // Add to preview
+              const imgElement = document.createElement("img");
+              imgElement.src = data.secure_url;
+              imgElement.alt = "Property Image";
+              imgElement.classList.add(
+                "w-24",
+                "h-24",
+                "object-cover",
+                "inline-block",
+                "mr-2",
+                "mb-2",
+              );
+              imagePreview.appendChild(imgElement);
+            }
+          } catch (err) {
+            console.error("Upload error:", err);
+          }
+        }
+        uploadedImageUrls = [...uploadedImageUrls, ...newUploadedUrls];
+        imageUrlsInput.value = JSON.stringify(uploadedImageUrls);
+
+        loadingSpinner.classList.add("hidden");
+        submitButton.disabled = false;
+      }
+    });
+  }
+
+  if (form && submitButton) {
+    form.addEventListener("submit", () => {
+      submitButton.classList.add(
+        "loading",
+        "loading-spinner",
+        "loading-md",
+        "btn-disabled",
+      );
+      submitButton.disabled = true;
+    });
+  }
+</script>
